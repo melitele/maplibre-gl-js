@@ -122,6 +122,7 @@ export class VectorTileSource extends Evented implements Source {
                 this.fire(new Event('data', {dataType: 'source', sourceDataType: 'content'}));
             }
         } catch (err) {
+            this._loaded = true;
             this._tileJSONRequest = null;
             this.fire(new ErrorEvent(err));
         }
