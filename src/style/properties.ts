@@ -2,7 +2,6 @@ import {clone, extend, easeCubicInOut} from '../util/util';
 import {interpolates, type Color, type StylePropertySpecification, normalizePropertyExpression,
     type Feature,
     type FeatureState,
-    type GlobalProperties,
     type StylePropertyExpression,
     type SourceExpression,
     type CompositeExpression, type TransitionSpecification,
@@ -72,13 +71,11 @@ export class PropertyValue<T, R> {
     property: Property<T, R>;
     value: PropertyValueSpecification<T> | void;
     expression: StylePropertyExpression;
-    private _evaluate: (parameters: EvaluationParameters) => R; // original evaluate function
 
     constructor(property: Property<T, R>, value: PropertyValueSpecification<T> | void) {
         this.property = property;
         this.value = value;
         this.expression = normalizePropertyExpression(value === undefined ? property.specification.default : value, property.specification);
-        this._evaluate = this.expression.evaluate;
     }
 
     isDataDriven(): boolean {
@@ -98,13 +95,7 @@ export class PropertyValue<T, R> {
     }
 
     setGlobalState(globalState: Record<string, any>) {
-        //@ts-ignore
-        this.expression.evaluate = (globals: GlobalProperties, feature?: Feature, featureState?: FeatureState, canonical?: ICanonicalTileID, availableImages?: Array<string>, formattedSection?: FormattedSection) => {
-            // force the use of global state object when evaluating any expression
-            //@ts-ignore
-            globals.globalState = globalState;
-            return this._evaluate.call(this.expression, globals, feature, featureState, canonical, availableImages, formattedSection);
-        };
+        this.expression.globalState = globalState;
     }
 }
 
