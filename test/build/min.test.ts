@@ -1,5 +1,6 @@
 import {describe, test, expect} from 'vitest';
 import fs from 'fs';
+import path from 'path';
 import packageJson from '../../package.json' assert {type: 'json'};
 import bundleSize from './bundle_size.json' assert {type: 'json'};
 
@@ -39,7 +40,12 @@ describe('test min build', () => {
         const decreaseQuota = 4096;
 
         // feel free to update this value after you've checked that it has changed on purpose :-)
-        const expectedBytes = bundleSize;
+        let expectedBytes = bundleSize;
+
+        if (process.env.UPDATE) {
+            expectedBytes = actualBytes - increaseQuota + 1;
+            fs.writeFileSync(path.resolve(__dirname, './bundle_size.json'), `${expectedBytes}\n`);
+        }
 
         expect(actualBytes).toBeLessThan(expectedBytes + increaseQuota);
         expect(actualBytes).toBeGreaterThan(expectedBytes - decreaseQuota);
