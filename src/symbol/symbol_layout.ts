@@ -698,6 +698,7 @@ function addSymbol(bucket: SymbolBucket,
 
     const variableAnchorOffset = getTextVariableAnchorOffset(layer, feature, canonical);
     const [textAnchorOffsetStartIndex, textAnchorOffsetEndIndex] = addTextVariableAnchorOffsets(bucket.textAnchorOffsets, variableAnchorOffset);
+    const crossTileID = feature.id && layer.id ? getCrossTileID(`${feature.id}-${layer.id}`) : 0;
 
     bucket.symbolInstances.emplaceBack(
         anchor.x,
@@ -723,7 +724,7 @@ function addSymbol(bucket: SymbolBucket,
         numIconVertices,
         numVerticalIconVertices,
         useRuntimeCollisionCircles,
-        0,
+        crossTileID,
         textBoxScale,
         collisionCircleDiameter,
         textAnchorOffsetStartIndex,
@@ -746,4 +747,15 @@ function anchorIsTooClose(bucket: SymbolBucket, text: string, repeatDistance: nu
     // If anchor is not within repeatDistance of any other anchor, add to array
     compareText[text].push(anchor);
     return false;
+}
+
+let maxCrossTileID: number = 0;
+const crossTileIDs: Map<string, number> = new Map<string, number>();
+function getCrossTileID(key: string): number {
+    let id = crossTileIDs.get(key);
+    if (id === undefined) {
+        id = ++maxCrossTileID;
+        crossTileIDs.set(key, id);
+    }
+    return id;
 }
